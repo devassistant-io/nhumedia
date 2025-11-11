@@ -201,7 +201,7 @@ export default function BlogPostPage() {
             className="mt-16 bg-dark text-white rounded-2xl p-8 md:p-12 text-center"
           >
             <h3 className="text-3xl font-bold mb-4">
-              Ready to Transform Your Content Strategy?
+              <span className="text-slate-900">Ready to Transform Your</span> <span className="text-primary">Content Strategy?</span>
             </h3>
             <p className="text-xl text-gray-300 mb-8">
               Let's create content that drives real results for your business
