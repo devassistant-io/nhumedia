@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { Octokit } from 'octokit';
 
 interface BlogPost {
   slug: string;
@@ -34,27 +33,52 @@ image: '${post.image}'
 
 ${post.content}`;
 
-    // Write to file
-    const postsDirectory = path.join(process.cwd(), 'content/blog');
-    
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(postsDirectory)) {
-      fs.mkdirSync(postsDirectory, { recursive: true });
+    // Initialize GitHub client
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN
+    });
+
+    const owner = 'devassistant-io';
+    const repo = 'nhumedia';
+    const path = `content/blog/${post.slug}.mdx`;
+    const branch = 'main';
+
+    // Get current file SHA if it exists (for updates)
+    let sha: string | undefined;
+    if (!isNew) {
+      try {
+        const { data } = await octokit.rest.repos.getContent({
+          owner,
+          repo,
+          path,
+          ref: branch,
+        });
+        if ('sha' in data) {
+          sha = data.sha;
+        }
+      } catch (error) {
+        // File doesn't exist yet
+      }
     }
 
-    const filePath = path.join(postsDirectory, `${post.slug}.mdx`);
-    
-    // Check if file exists when creating new post
-    if (isNew && fs.existsSync(filePath)) {
-      return NextResponse.json({ success: false, error: 'Post with this slug already exists' }, { status: 400 });
-    }
+    // Create or update file on GitHub
+    await octokit.rest.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path,
+      message: isNew ? `Add blog post: ${post.title}` : `Update blog post: ${post.title}`,
+      content: Buffer.from(frontmatter).toString('base64'),
+      branch,
+      sha,
+    });
 
-    fs.writeFileSync(filePath, frontmatter, 'utf8');
-
-    return NextResponse.json({ success: true, message: 'Post saved successfully' });
+    return NextResponse.json({ success: true, message: 'Post saved and published!' });
   } catch (error) {
     console.error('Error saving post:', error);
-    return NextResponse.json({ success: false, error: 'Failed to save post' }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to save post' 
+    }, { status: 500 });
   }
 }
 

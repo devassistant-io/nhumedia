@@ -17,11 +17,13 @@ export interface BlogPost {
 
 export function getAllPosts(): BlogPost[] {
   // Check if directory exists
-  if (!fs.existsSync(postsDirectory)) {
-    return [];
-  }
+  try {
+    if (!fs.existsSync(postsDirectory)) {
+      console.log('Blog directory does not exist:', postsDirectory);
+      return [];
+    }
 
-  const fileNames = fs.readdirSync(postsDirectory);
+    const fileNames = fs.readdirSync(postsDirectory);
   const allPostsData = fileNames
     .filter((fileName) => fileName.endsWith('.mdx') || fileName.endsWith('.md'))
     .map((fileName) => {
@@ -56,6 +58,10 @@ export function getAllPosts(): BlogPost[] {
       return -1;
     }
   });
+  } catch (error) {
+    console.error('Error loading blog posts:', error);
+    return [];
+  }
 }
 
 export function getPostBySlug(slug: string): BlogPost | null {
