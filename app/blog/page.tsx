@@ -5,82 +5,39 @@ import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
 import { Calendar, User, ArrowRight, Search } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const blogPosts = [
-  {
-    id: 1,
-    title: 'Setting Your Brand Apart: The Power of High-Quality Content',
-    excerpt:
-      'Discover how high-quality content can differentiate your brand in a crowded digital marketplace and build lasting customer relationships.',
-    author: 'Nhu Media Team',
-    date: 'October 15, 2024',
-    category: 'Content Marketing',
-    image: 'https://images.unsplash.com/photo-1542435503-956c469947f6?w=800&q=80',
-    slug: 'power-of-high-quality-content',
-  },
-  {
-    id: 2,
-    title: 'Reasons Why Businesses Advertise Online (And Why You Should Too)',
-    excerpt:
-      'Explore the compelling reasons why online advertising is essential for business growth in today\'s digital-first world.',
-    author: 'Nhu Media Team',
-    date: 'October 8, 2024',
-    category: 'Digital Marketing',
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
-    slug: 'why-businesses-advertise-online',
-  },
-  {
-    id: 3,
-    title: 'SEO Can Transform Your Google Ads Performance: A Real-World Success Story',
-    excerpt:
-      'Learn how combining SEO with Google Ads can dramatically improve your campaign performance and ROI through a case study.',
-    author: 'Nhu Media Team',
-    date: 'September 22, 2024',
-    category: 'Google Ads',
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
-    slug: 'seo-google-ads-success-story',
-  },
-  {
-    id: 4,
-    title: 'The Complete Guide to Facebook Advertising in 2024',
-    excerpt:
-      'Master Facebook and Instagram advertising with our comprehensive guide covering targeting, creative best practices, and optimization strategies.',
-    author: 'Nhu Media Team',
-    date: 'September 10, 2024',
-    category: 'Social Media',
-    image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80',
-    slug: 'facebook-advertising-guide-2024',
-  },
-  {
-    id: 5,
-    title: 'How to Maximize Your PPC Budget: 10 Expert Tips',
-    excerpt:
-      'Get the most out of every advertising dollar with these proven strategies for optimizing your pay-per-click campaigns.',
-    author: 'Nhu Media Team',
-    date: 'August 28, 2024',
-    category: 'PPC',
-    image: 'https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=800&q=80',
-    slug: 'maximize-ppc-budget-tips',
-  },
-  {
-    id: 6,
-    title: 'Local SEO Strategies That Actually Work',
-    excerpt:
-      'Boost your local presence and attract more customers with these proven local SEO tactics that deliver measurable results.',
-    author: 'Nhu Media Team',
-    date: 'August 15, 2024',
-    category: 'SEO',
-    image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
-    slug: 'local-seo-strategies',
-  },
-];
+interface BlogPost {
+  slug: string;
+  title: string;
+  excerpt: string;
+  author: string;
+  date: string;
+  category: string;
+  image: string;
+}
 
 const categories = ['All', 'Digital Marketing', 'Google Ads', 'Social Media', 'Content Marketing', 'PPC', 'SEO'];
 
 export default function BlogPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch blog posts from API
+    fetch('/api/blog')
+      .then((res) => res.json())
+      .then((data) => {
+        setBlogPosts(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching blog posts:', error);
+        setLoading(false);
+      });
+  }, []);
 
   const filteredPosts = blogPosts.filter((post) => {
     const matchesCategory =
@@ -90,6 +47,16 @@ export default function BlogPage() {
       post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -153,7 +120,11 @@ export default function BlogPage() {
       {/* Blog Posts Grid */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {filteredPosts.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-20">
+              <p className="text-xl text-gray-600">Loading articles...</p>
+            </div>
+          ) : filteredPosts.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-xl text-gray-600">
                 No articles found. Try adjusting your search or filters.
@@ -163,7 +134,7 @@ export default function BlogPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post, index) => (
                 <motion.article
-                  key={post.id}
+                  key={post.slug}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -186,7 +157,7 @@ export default function BlogPage() {
                     <div className="flex items-center text-sm text-gray-500 mb-3 space-x-4">
                       <div className="flex items-center space-x-1">
                         <Calendar className="w-4 h-4" />
-                        <span>{post.date}</span>
+                        <span>{formatDate(post.date)}</span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <User className="w-4 h-4" />
@@ -238,5 +209,3 @@ export default function BlogPage() {
     </main>
   );
 }
-
-

@@ -7,11 +7,11 @@
   "deploy": {
     "numReplicas": 1,
     "healthcheckPath": "/api/health",
-    "healthcheckTimeout": 300,
+    "healthcheckTimeout": 100,
     "restartPolicy": {
       "maxRetries": 10
     },
-    "startCommand": "npm start"
+    "startCommand": "npm run start"
   }
 }
 
