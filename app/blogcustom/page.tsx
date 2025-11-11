@@ -299,8 +299,12 @@ export default function BlogAdminPage() {
                         const file = e.target.files?.[0];
                         if (!file) return;
 
+                        // Show preview immediately
+                        const previewUrl = URL.createObjectURL(file);
+                        setEditingPost({ ...editingPost, image: previewUrl });
+
                         setUploadingImage(true);
-                        setMessage('');
+                        setMessage('Uploading image...');
 
                         try {
                           const formData = new FormData();
@@ -314,12 +318,19 @@ export default function BlogAdminPage() {
                           const data = await response.json();
 
                           if (data.success) {
+                            // Clean up preview URL and use actual URL
+                            URL.revokeObjectURL(previewUrl);
                             setEditingPost({ ...editingPost, image: data.imageUrl });
                             setMessage('Image uploaded successfully!');
                           } else {
+                            // Revert to empty if upload failed
+                            URL.revokeObjectURL(previewUrl);
+                            setEditingPost({ ...editingPost, image: '' });
                             setMessage('Failed to upload image: ' + (data.error || 'Unknown error'));
                           }
                         } catch (error) {
+                          URL.revokeObjectURL(previewUrl);
+                          setEditingPost({ ...editingPost, image: '' });
                           setMessage('Error uploading image');
                         } finally {
                           setUploadingImage(false);
@@ -327,18 +338,6 @@ export default function BlogAdminPage() {
                       }}
                     />
                   </label>
-                </div>
-
-                {/* Or use URL */}
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600 mb-2">Or paste image URL:</p>
-                  <input
-                    type="url"
-                    value={editingPost.image}
-                    onChange={(e) => setEditingPost({ ...editingPost, image: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none"
-                    placeholder="https://images.unsplash.com/..."
-                  />
                 </div>
               </div>
 
