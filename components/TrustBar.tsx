@@ -66,7 +66,8 @@ export default function TrustBar() {
                       alt={`${brand.name} logo`}
                       width={160}
                       height={70}
-                      className="object-contain w-full h-full"
+                      className="object-contain w-full"
+                      style={{ height: 'auto' }}
                     />
                   </div>
                 </div>
@@ -85,7 +86,8 @@ export default function TrustBar() {
                       alt={`${brand.name} logo`}
                       width={160}
                       height={70}
-                      className="object-contain w-full h-full"
+                      className="object-contain w-full"
+                      style={{ height: 'auto' }}
                     />
                   </div>
                 </div>

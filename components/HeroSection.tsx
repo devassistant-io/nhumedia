@@ -3,14 +3,13 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import MultiStepForm from './MultiStepForm';
+import AnimatedBackground from './AnimatedBackground';
 
 export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24 pb-16 bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      {/* Premium Background Elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(112,155,163,0.08),transparent_50%)]"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(90,128,137,0.06),transparent_50%)]"></div>
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+      {/* Animated Background */}
+      <AnimatedBackground />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
