@@ -23,6 +23,7 @@ export default function BlogAdminPage() {
   const [isNewPost, setIsNewPost] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const categories = ['Digital Marketing', 'Google Ads', 'Social Media', 'Content Marketing', 'PPC', 'SEO'];
 
@@ -259,15 +260,86 @@ export default function BlogAdminPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-2">Featured Image URL</label>
-                <input
-                  type="url"
-                  value={editingPost.image}
-                  onChange={(e) => setEditingPost({ ...editingPost, image: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none"
-                  placeholder="https://images.unsplash.com/..."
-                  required
-                />
+                <label className="block text-sm font-semibold mb-2">Featured Image</label>
+                
+                {/* Image Preview */}
+                {editingPost.image && (
+                  <div className="mb-4 relative">
+                    <img 
+                      src={editingPost.image} 
+                      alt="Preview" 
+                      className="w-full h-48 object-cover rounded-lg border-2 border-gray-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setEditingPost({ ...editingPost, image: '' })}
+                      className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-700"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+
+                {/* Upload Button */}
+                <div className="flex gap-2">
+                  <label className="flex-1 cursor-pointer">
+                    <div className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary transition-colors text-center">
+                      {uploadingImage ? (
+                        <span className="text-gray-500">Uploading...</span>
+                      ) : (
+                        <span className="text-gray-700 font-medium">📤 Upload Image</span>
+                      )}
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadingImage}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        setUploadingImage(true);
+                        setMessage('');
+
+                        try {
+                          const formData = new FormData();
+                          formData.append('image', file);
+
+                          const response = await fetch('/api/blog/admin/upload-image', {
+                            method: 'POST',
+                            body: formData,
+                          });
+
+                          const data = await response.json();
+
+                          if (data.success) {
+                            setEditingPost({ ...editingPost, image: data.imageUrl });
+                            setMessage('Image uploaded successfully!');
+                          } else {
+                            setMessage('Failed to upload image: ' + (data.error || 'Unknown error'));
+                          }
+                        } catch (error) {
+                          setMessage('Error uploading image');
+                        } finally {
+                          setUploadingImage(false);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+
+                {/* Or use URL */}
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600 mb-2">Or paste image URL:</p>
+                  <input
+                    type="url"
+                    value={editingPost.image}
+                    onChange={(e) => setEditingPost({ ...editingPost, image: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none"
+                    placeholder="https://images.unsplash.com/..."
+                  />
+                </div>
               </div>
 
               <div>
