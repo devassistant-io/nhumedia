@@ -71,7 +71,7 @@ export default function BlogPage() {
             className="text-center"
           >
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Our <span className="text-primary">Blog</span>
+              <span className="text-slate-900">Our</span> <span className="text-primary">Blog</span>
             </h1>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
               Expert insights, strategies, and success stories to help you grow
@@ -82,37 +82,66 @@ export default function BlogPage() {
       </section>
 
       {/* Search and Filter */}
-      <section className="py-12 bg-white border-b">
+      <section className="py-8 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
-            {/* Search */}
-            <div className="relative w-full md:w-96">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search articles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none"
-              />
+          <div className="bg-gray-50 rounded-2xl p-6 shadow-sm border border-gray-200">
+            <div className="flex flex-col md:flex-row gap-4 items-stretch">
+              {/* Search */}
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search articles by title or keyword..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all text-gray-900 placeholder:text-gray-500"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Category Dropdown */}
+              <div className="relative md:w-72">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full appearance-none px-4 py-3.5 pr-10 bg-white border border-gray-300 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all font-medium text-gray-900 cursor-pointer"
+                >
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category === 'All' ? 'All Categories' : category}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                  <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
-            {/* Categories */}
-            <div className="flex flex-wrap gap-2 justify-center">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                    selectedCategory === category
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-200 text-dark hover:bg-gray-300'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+            {/* Results count */}
+            {!loading && (
+              <div className="mt-4 text-sm text-gray-600">
+                {filteredPosts.length === 0 ? (
+                  <p>No articles found. Try different keywords or category.</p>
+                ) : (
+                  <p>
+                    Showing <span className="font-semibold text-gray-900">{filteredPosts.length}</span> 
+                    {filteredPosts.length === 1 ? ' article' : ' articles'}
+                    {searchQuery && <> matching "<span className="font-semibold text-gray-900">{searchQuery}</span>"</>}
+                    {selectedCategory !== 'All' && <> in <span className="font-semibold text-gray-900">{selectedCategory}</span></>}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -191,7 +220,7 @@ export default function BlogPage() {
       <section className="py-20 bg-dark text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl font-bold mb-6">
-            Ready to Transform Your <span className="text-primary">Digital Marketing?</span>
+            <span className="text-slate-900">Ready to Transform Your</span> <span className="text-primary">Digital Marketing?</span>
           </h2>
           <p className="text-xl text-gray-300 mb-8">
             Let's discuss how we can help you achieve your business goals
