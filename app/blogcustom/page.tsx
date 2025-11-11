@@ -23,7 +23,7 @@ export default function BlogAdminPage() {
   const [isNewPost, setIsNewPost] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
 
   const categories = ['Digital Marketing', 'Google Ads', 'Social Media', 'Content Marketing', 'PPC', 'SEO'];
 
@@ -71,11 +71,37 @@ export default function BlogAdminPage() {
     setMessage('');
 
     try {
+      let finalImageUrl = editingPost.image;
+
+      // If there's a selected image file, upload it first
+      if (selectedImageFile) {
+        setMessage('Uploading image...');
+        const formData = new FormData();
+        formData.append('image', selectedImageFile);
+
+        const uploadResponse = await fetch('/api/blog/admin/upload-image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const uploadData = await uploadResponse.json();
+
+        if (uploadData.success) {
+          finalImageUrl = uploadData.imageUrl;
+        } else {
+          setMessage('Failed to upload image: ' + (uploadData.error || 'Unknown error'));
+          setLoading(false);
+          return;
+        }
+      }
+
+      setMessage('Saving post...');
+
       const response = await fetch('/api/blog/admin/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          post: editingPost,
+          post: { ...editingPost, image: finalImageUrl },
           isNew: isNewPost,
         }),
       });
@@ -125,6 +151,7 @@ export default function BlogAdminPage() {
 
   const handleNewPost = () => {
     setIsNewPost(true);
+    setSelectedImageFile(null);
     setEditingPost({
       slug: '',
       title: '',
@@ -176,6 +203,7 @@ export default function BlogAdminPage() {
               onClick={() => {
                 setEditingPost(null);
                 setIsNewPost(false);
+                setSelectedImageFile(null);
               }}
               className="flex items-center space-x-2 text-primary hover:text-secondary mb-6"
             >
@@ -272,7 +300,10 @@ export default function BlogAdminPage() {
                     />
                     <button
                       type="button"
-                      onClick={() => setEditingPost({ ...editingPost, image: '' })}
+                      onClick={() => {
+                        setEditingPost({ ...editingPost, image: '' });
+                        setSelectedImageFile(null);
+                      }}
                       className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-red-700"
                     >
                       Remove
@@ -284,61 +315,29 @@ export default function BlogAdminPage() {
                 <div className="flex gap-2">
                   <label className="flex-1 cursor-pointer">
                     <div className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary transition-colors text-center">
-                      {uploadingImage ? (
-                        <span className="text-gray-500">Uploading...</span>
-                      ) : (
-                        <span className="text-gray-700 font-medium">📤 Upload Image</span>
-                      )}
+                      <span className="text-gray-700 font-medium">📤 Select Image</span>
                     </div>
                     <input
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      disabled={uploadingImage}
-                      onChange={async (e) => {
+                      onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
 
-                        // Show preview immediately
+                        // Store the file and show preview
+                        setSelectedImageFile(file);
                         const previewUrl = URL.createObjectURL(file);
                         setEditingPost({ ...editingPost, image: previewUrl });
-
-                        setUploadingImage(true);
-                        setMessage('Uploading image...');
-
-                        try {
-                          const formData = new FormData();
-                          formData.append('image', file);
-
-                          const response = await fetch('/api/blog/admin/upload-image', {
-                            method: 'POST',
-                            body: formData,
-                          });
-
-                          const data = await response.json();
-
-                          if (data.success) {
-                            // Clean up preview URL and use actual URL
-                            URL.revokeObjectURL(previewUrl);
-                            setEditingPost({ ...editingPost, image: data.imageUrl });
-                            setMessage('Image uploaded successfully!');
-                          } else {
-                            // Revert to empty if upload failed
-                            URL.revokeObjectURL(previewUrl);
-                            setEditingPost({ ...editingPost, image: '' });
-                            setMessage('Failed to upload image: ' + (data.error || 'Unknown error'));
-                          }
-                        } catch (error) {
-                          URL.revokeObjectURL(previewUrl);
-                          setEditingPost({ ...editingPost, image: '' });
-                          setMessage('Error uploading image');
-                        } finally {
-                          setUploadingImage(false);
-                        }
                       }}
                     />
                   </label>
                 </div>
+                {selectedImageFile && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Selected: {selectedImageFile.name} (will upload when you save)
+                  </p>
+                )}
               </div>
 
               <div>
