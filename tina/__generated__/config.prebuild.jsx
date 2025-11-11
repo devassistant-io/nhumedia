@@ -1,29 +1,21 @@
+// tina/config.ts
 import { defineConfig } from "tinacms";
-
-// Your hosting provider likely exposes this as an environment variable
-const branch =
-  process.env.GITHUB_BRANCH ||
-  process.env.VERCEL_GIT_COMMIT_REF ||
-  process.env.HEAD ||
-  "main";
-
-export default defineConfig({
+var branch = process.env.GITHUB_BRANCH || process.env.VERCEL_GIT_COMMIT_REF || process.env.HEAD || "main";
+var config_default = defineConfig({
   branch,
-
   // Get this from tina.io
   clientId: process.env.NEXT_PUBLIC_TINA_CLIENT_ID,
   // Get this from tina.io
   token: process.env.TINA_TOKEN,
-
   build: {
     outputFolder: "admin",
-    publicFolder: "public",
+    publicFolder: "public"
   },
   media: {
     tina: {
       mediaRoot: "images",
-      publicFolder: "public",
-    },
+      publicFolder: "public"
+    }
   },
   // See docs on content modeling for more info on how to setup new content models: https://tina.io/docs/schema/
   schema: {
@@ -39,7 +31,7 @@ export default defineConfig({
             name: "title",
             label: "Title",
             isTitle: true,
-            required: true,
+            required: true
           },
           {
             type: "string",
@@ -47,21 +39,21 @@ export default defineConfig({
             label: "Excerpt",
             required: true,
             ui: {
-              component: "textarea",
-            },
+              component: "textarea"
+            }
           },
           {
             type: "string",
             name: "author",
             label: "Author",
             required: true,
-            options: ["Nhu Media Team"],
+            options: ["Nhu Media Team"]
           },
           {
             type: "datetime",
             name: "date",
             label: "Date",
-            required: true,
+            required: true
           },
           {
             type: "string",
@@ -74,24 +66,26 @@ export default defineConfig({
               "Social Media",
               "Content Marketing",
               "PPC",
-              "SEO",
-            ],
+              "SEO"
+            ]
           },
           {
             type: "image",
             name: "image",
             label: "Featured Image",
-            required: true,
+            required: true
           },
           {
             type: "rich-text",
             name: "body",
             label: "Body",
-            isBody: true,
-          },
-        ],
-      },
-    ],
-  },
+            isBody: true
+          }
+        ]
+      }
+    ]
+  }
 });
-
+export {
+  config_default as default
+};

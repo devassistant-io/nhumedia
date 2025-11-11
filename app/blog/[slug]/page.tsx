@@ -178,9 +178,9 @@ export default function BlogPostPage() {
                   ol: ({node, ...props}) => <ol className="space-y-3 mb-6 list-decimal pl-6" {...props} />,
                   li: ({node, ...props}) => <li className="text-gray-700" {...props} />,
                   strong: ({node, ...props}) => <strong className="font-bold text-gray-900" {...props} />,
-                  blockquote: ({node, ...props}) => (
+                  blockquote: ({node, children, ...props}) => (
                     <div className="bg-primary/10 border-l-4 border-primary p-6 my-8 rounded">
-                      <p className="text-lg italic text-gray-800" {...props} />
+                      <p className="text-lg italic text-gray-800">{children}</p>
                     </div>
                   ),
                   a: ({node, ...props}) => (
