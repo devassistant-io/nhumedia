@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "tinacms dev -c \"next dev --hostname localhost\"",
-    "build": "tinacms build && next build",
+    "dev:notina": "next dev --hostname localhost",
+    "build": "next build",
+    "build:tina": "tinacms build && next build",
     "start": "next start -p ${PORT:-3000}",
     "lint": "eslint"
   },
