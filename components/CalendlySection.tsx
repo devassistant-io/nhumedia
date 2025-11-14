@@ -2,9 +2,24 @@
 
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Video } from 'lucide-react';
-import MultiStepForm from './MultiStepForm';
+import { useEffect } from 'react';
 
 export default function CalendlySection() {
+  useEffect(() => {
+    // Load Calendly widget script
+    const script = document.createElement('script');
+    script.src = 'https://assets.calendly.com/assets/external/widget.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup script on unmount
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, []);
+
   return (
     <section id="contact" className="py-20 md:py-32 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,7 +39,7 @@ export default function CalendlySection() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           {/* Left Column - Benefits */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -80,13 +95,18 @@ export default function CalendlySection() {
             </div>
           </motion.div>
 
-          {/* Right Column - Contact Form */}
+          {/* Right Column - Calendly Embed */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            className="w-full"
           >
-            <MultiStepForm />
+            <div 
+              className="calendly-inline-widget" 
+              data-url="https://calendly.com/nhumediastudio/30min?hide_event_type_details=1&hide_gdpr_banner=1&primary_color=709ba3" 
+              style={{ minWidth: '320px', height: '500px' }}
+            />
           </motion.div>
         </div>
       </div>
